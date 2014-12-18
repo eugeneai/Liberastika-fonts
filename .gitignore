@@ -1,4 +1,8 @@
 .svn/
 *.ff
+*.pfb
+*py
+*.xgf
+*.sfd
 
 
