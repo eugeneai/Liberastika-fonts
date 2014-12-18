@@ -1,0 +1,72 @@
+#!/usr/bin/env fontforge
+/* Copyright (C) 2008-2011, 2013 Andrey V. Panov
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, see <http://www.gnu.org/licenses/>.
+ */
+
+fontname=$1
+_kern_subtable = "LGC kerning subtable"
+Open(fontname+".sfd")
+Reencode("unicode")
+same_cyrext.ff()
+combining.ff()
+anchors.ff()
+spaces_dashes.ff()
+ellipsis.ff()
+case_sub.ff()
+add_accented.ff()
+liga_sub.ff()
+serbsubs.ff()
+Save(fontname+"_.sfd")
+
+SetFontOrder(3)
+SetPref("InstructSerifs",0)
+SetPref("InstructBallTerminals",0)
+SetPref("DetectDiagonalStems",1)
+SetPref("InterpolateStrongPoints",1)
+PrivateGuess("BlueValues")
+PrivateGuess("OtherBlues")
+PrivateGuess("BlueScale")
+PrivateGuess("BlueShift")
+Select("tse")
+bbox = GlyphInfo("BBox")
+pr_string = GetPrivateEntry("OtherBlues")
+length = Strlen(pr_string)
+if (length > 2)
+ pr_string = Strsub(pr_string,1,length-1)
+endif
+private = StrSplit(pr_string," ")
+size_ar = SizeOf(private)
+check = 1
+i = 0
+while (i < size_ar)
+ if ( Strtol(private[i]) <= Round(bbox[1]) && Strtol(private[i+1]) >= Round(bbox[1]))
+  check = 0
+ endif
+ i = i+2
+endloop
+if (check)
+ ChangePrivateEntry("OtherBlues","["+pr_string+" "+ToString(Round(bbox[1]))+" "+ToString(Round(bbox[1]))+"]")
+endif
+SelectWorthOutputting()
+RoundToInt()
+Simplify()
+CanonicalContours()
+CanonicalStart()
+AutoHint()
+PrivateGuess("StdHW")
+PrivateGuess("StdVW")
+PrivateGuess("StemSnapH")
+PrivateGuess("StemSnapV")
+Generate(fontname+".pfb","",0x200000)
